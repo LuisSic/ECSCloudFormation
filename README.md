@@ -64,9 +64,7 @@ This file is used to create a nested stack, for templates that are separated. Th
 
 ## Infrastructure
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+ <img src="./Resources/ECS.png" title="Architecture">
 
 
 ## Authors
