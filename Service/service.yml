@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+    
+Parameters:
+    EnvironmentName:
+      Type: String
+    
+    Cluster:
+      Type: String
+    
+    AppName: 
+      Type: String
+    
+    AppContainerPort:
+      Type: Number
+
+    AppHostPort:
+      Type: Number
+        
+    IdImage:
+      Type: String
+
+    ECSDesiredCount: 
+      Type: Number
+    
+    TargetGroup:
+      Type: String
+
+Resources:
+
+  ECSTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+        Family: !Ref AppName
+        ContainerDefinitions:
+            - 
+                Name: !Ref AppName
+                Image: !Ref IdImage
+                PortMappings:
+                    -
+                        ContainerPort: !Ref AppContainerPort
+                        HostPort: !Ref AppHostPort
+                Memory: 128
+              
+  ECSservice:
+    Type: "AWS::ECS::Service"
+    Properties:
+        Cluster: !Ref Cluster
+        DesiredCount: !Ref ECSDesiredCount
+        LoadBalancers:
+            - ContainerName: !Ref AppName
+              ContainerPort: !Ref AppContainerPort
+              TargetGroupArn: !Ref TargetGroup
+        ServiceName: !Sub service-${EnvironmentName}
+        TaskDefinition: !Ref ECSTaskDefinition
+    
+    

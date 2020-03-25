@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This yml file create a ecs cluster whit application load balancer
+    
+Resources:
+    VPC:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: "https://your_bucket/vpc.yml" #required
+            Parameters:
+                VpcCIDR: 10.0.0.0/16
+                PublicSubnet1CIDR: 10.0.1.0/24
+                PublicSubnet2CIDR: 10.0.2.0/24
+                PublicSubnet3CIDR: 10.0.3.0/24
+                PrivateSubnet1CIDR: 10.0.4.0/24
+                PrivateSubnet2CIDR: 10.0.5.0/24
+                PrivateSubnet3CIDR: 10.0.6.0/24
+                EnvironmentName: sluis
+    ECSCluster:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: "https://your_bucket/cluster.yml" #required
+            Parameters:
+                Ami: ami-098616968d61e549e
+                EC2InstanceType: t2.micro
+                EC2SecurityGroup: !GetAtt VPC.Outputs.DMZSecurityGroup
+                ClusterSize: 2
+                ListSubnets: !GetAtt VPC.Outputs.PublicSubnets
+                EnvironmentName: sluis
+
+            
+    ECSLoadBalancer:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: "https://your_bucket/lb.yml" #required
+            Parameters:
+                EnvironmentName: sluis
+                SecurityGroup: !GetAtt VPC.Outputs.DMZSecurityGroup
+                ListSubnets: !GetAtt VPC.Outputs.PublicSubnets
+                VPC: !GetAtt VPC.Outputs.VPC   
+    ECSservice:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ECSLoadBalancer
+        Properties:
+            TemplateURL: "https://your_bucket/service.yml" #required
+            Parameters:
+                EnvironmentName: sluis
+                Cluster: !GetAtt ECSCluster.Outputs.ECSCluster
+                AppName: Full-Motion
+                AppContainerPort: 80
+                AppHostPort: 80
+                IdImage: 492266378106.dkr.ecr.us-east-1.amazonaws.com/sluis117:latest
+                ECSDesiredCount: 2
+                TargetGroup: !GetAtt ECSLoadBalancer.Outputs.ECSTargetGroup

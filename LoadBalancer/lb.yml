@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template create a LB for ECS
+    
+Parameters:
+    EnvironmentName:
+      Type: String
+    
+    SecurityGroup:
+      Type: String
+    
+    ListSubnets:
+      Type: CommaDelimitedList 
+    
+    VPC:
+      Type: String
+       
+Resources:
+    LoadBalancer:
+        Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        Properties:
+            Name: !Sub ${EnvironmentName}-lb
+            SecurityGroups: 
+                - !Ref SecurityGroup
+            Subnets: !Ref ListSubnets
+    
+    LoadBalancerListener:
+        Type: "AWS::ElasticLoadBalancingV2::Listener"
+        Properties:
+            DefaultActions: #required
+                - Type: forward
+                  TargetGroupArn: !Ref TargetGroup
+            LoadBalancerArn: !Ref LoadBalancer #required
+            Port: 80 #required
+            Protocol: HTTP #required
+    
+    TargetGroup:
+        Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+        Properties:
+            Name: !Sub ${EnvironmentName}-targetGroup
+            Port: 80
+            Protocol: HTTP
+            VpcId: !Ref VPC
+    
+Outputs:
+  ECSTargetGroup:
+    Description: A reference to the created TargetGroup
+    Value: !Ref TargetGroup
