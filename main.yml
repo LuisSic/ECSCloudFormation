@@ -48,6 +48,6 @@ Resources:
                 AppName: Full-Motion
                 AppContainerPort: 80
                 AppHostPort: 80
-                IdImage: 492266378106.dkr.ecr.us-east-1.amazonaws.com/sluis117:latest
+                IdImage: id
                 ECSDesiredCount: 2
                 TargetGroup: !GetAtt ECSLoadBalancer.Outputs.ECSTargetGroup
